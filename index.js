@@ -1,16 +1,8 @@
-// @flow
-
 import * as React from "react";
 export { withDefaultProps } from "mergeDefaultProps/withDefaultProps";
 export { NestedDefaultPropsProvider } from "mergeDefaultProps/NestedDefaultPropsProvider";
 
-type PropsT = {
-  children: any,
-  value: { ... },
-  defaultProps: { ... },
-};
-
-export const mergeDefaultProps = <T>(props: any): T => {
+export const mergeDefaultProps = (props) => {
   if (!props.defaultProps) {
     console.error("No default props: ", props);
   }

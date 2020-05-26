@@ -3,7 +3,7 @@ import * as React from "react";
 // $FlowFixMe
 export const DefaultPropsContext = React.createContext({});
 
-export const withDefaultProps = (WrappedComponent: any) => (props: any) => {
+export const withDefaultProps = WrappedComponent => props => {
   return (
     <DefaultPropsContext.Consumer>
       {defaultProps => {

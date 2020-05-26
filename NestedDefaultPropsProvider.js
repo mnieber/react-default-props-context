@@ -4,7 +4,7 @@ import {
   withDefaultProps,
 } from "mergeDefaultProps/withDefaultProps";
 
-export const NestedDefaultPropsProvider = withDefaultProps((props: PropsT) => {
+export const NestedDefaultPropsProvider = withDefaultProps(props => {
   const value = {
     ...(props.defaultProps || {}),
     ...props.value,
