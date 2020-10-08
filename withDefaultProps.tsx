@@ -1,12 +1,13 @@
-import * as React from "react";
+import * as React from 'react';
 
-// $FlowFixMe
 export const DefaultPropsContext = React.createContext({});
 
-export const withDefaultProps = WrappedComponent => props => {
+export const withDefaultProps = (WrappedComponent: React.FC) => (
+  props: any
+) => {
   return (
     <DefaultPropsContext.Consumer>
-      {defaultProps => {
+      {(defaultProps: any) => {
         return <WrappedComponent {...props} defaultProps={defaultProps} />;
       }}
     </DefaultPropsContext.Consumer>

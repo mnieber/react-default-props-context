@@ -1,0 +1,18 @@
+{
+  "name": "react-default-props-context",
+  "version": "1.0.0",
+  "description": "Provide form state via a React Context",
+  "main": "index.js",
+  "repository": "https://github.com/mnieber/react-form-state-context.git",
+  "author": "Maarten Nieber",
+  "license": "MIT",
+  "types": "index.d.ts",
+  "prepublish": "tsc",
+  "dependencies": {
+    "@types/react": "^16.9.51",
+    "react": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.3"
+  }
+}

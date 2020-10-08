@@ -1,10 +1,8 @@
 import * as React from "react";
-import {
-  DefaultPropsContext,
-  withDefaultProps,
-} from "mergeDefaultProps/withDefaultProps";
 
-export const NestedDefaultPropsProvider = withDefaultProps(props => {
+import { DefaultPropsContext, withDefaultProps } from "./withDefaultProps";
+
+export const NestedDefaultPropsProvider = withDefaultProps((props: any) => {
   const value = {
     ...(props.defaultProps || {}),
     ...props.value,
