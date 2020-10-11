@@ -18,5 +18,6 @@
     "target": "es5"
     // "experimentalDecorators": true
   },
-  "include": ["."]
+  "include": ["."],
+  "exclude": ["node_modules", "dist"],
 }

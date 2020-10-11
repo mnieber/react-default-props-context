@@ -10,7 +10,7 @@
   "prepublish": "tsc",
   "dependencies": {
     "@types/react": "^16.9.51",
-    "react": "^16.0.0"
+    "react": "^16.13.1"
   },
   "devDependencies": {
     "typescript": "^4.0.3"
