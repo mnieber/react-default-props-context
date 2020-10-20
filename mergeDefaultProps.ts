@@ -1,4 +1,6 @@
-export const mergeDefaultProps = (props: any) => {
+import * as React from "react";
+
+const _mergeDefaultProps = (props: any) => {
   if (!props.defaultProps) {
     console.error("No default props: ", props);
   }
@@ -14,3 +16,16 @@ export const mergeDefaultProps = (props: any) => {
     },
   });
 };
+
+interface MixInDefaultProps {
+  defaultProps?: any;
+  children?: any;
+}
+
+export const mergeDefaultProps = <PropsT, DefaultPropsT>(
+  props: PropsT & MixInDefaultProps & Partial<DefaultPropsT>
+) => _mergeDefaultProps(props) as PropsT & MixInDefaultProps & DefaultPropsT;
+
+export type FC<PropsT, DefaultPropsT> = React.FC<
+  PropsT & MixInDefaultProps & Partial<DefaultPropsT>
+>;
