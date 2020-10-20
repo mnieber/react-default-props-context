@@ -1,4 +1,4 @@
-# mergeDefaultProps
+# useDefaultProps
 
 An alternative way to provide default properties to React components.
 
@@ -15,7 +15,7 @@ type DefaultPropsT = {
 }
 
 const MyComponent(p: PropsT) {
-  const props = mergeDefaultProps<PropsT & DefaultPropsT>(p);
+  const props = useDefaultProps<PropsT & DefaultPropsT>(p);
 
   // The color value comes either from p.color or p.defaultProps.color
   const myText = <text color={props.color}>Hello</text>;

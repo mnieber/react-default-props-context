@@ -1,4 +1,3 @@
-export { withDefaultProps, DefaultPropsContext } from "./withDefaultProps";
-export { NestedDefaultPropsProvider } from "./NestedDefaultPropsProvider";
-export { mergeDefaultProps } from "./mergeDefaultProps";
-export type { FC } from "./mergeDefaultProps";
+export { DefaultPropsContext. NestedDefaultPropsProvider } from "./NestedDefaultPropsProvider";
+export { useDefaultProps } from "./useDefaultProps";
+export type { FC } from "./useDefaultProps";

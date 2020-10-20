@@ -1,10 +1,16 @@
 import * as React from "react";
 
-import { DefaultPropsContext, withDefaultProps } from "./withDefaultProps";
+export const DefaultPropsContext = React.createContext({});
 
-export const NestedDefaultPropsProvider = withDefaultProps((props: any) => {
+export const useDefaultPropsContext = () => {
+  return React.useContext(DefaultPropsContext);
+};
+
+export const NestedDefaultPropsProvider = (props: any) => {
+  const defaultProps = useDefaultPropsContext();
+
   const value = {
-    ...(props.defaultProps || {}),
+    ...(defaultProps || {}),
     ...props.value,
   };
 
@@ -13,4 +19,4 @@ export const NestedDefaultPropsProvider = withDefaultProps((props: any) => {
       {props.children}
     </DefaultPropsContext.Provider>
   );
-});
+};
