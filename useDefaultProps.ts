@@ -23,9 +23,8 @@ const _mergeDefaultProps = (props: any) => {
 };
 
 export const useDefaultProps = <PropsT, DefaultPropsT>(
-  props: React.PropsWithChildren<PropsT & Partial<DefaultPropsT>>
-) =>
-  _mergeDefaultProps(props) as React.PropsWithChildren<PropsT & DefaultPropsT>;
+  props: PropsT & Partial<DefaultPropsT>
+) => _mergeDefaultProps(props) as PropsT & DefaultPropsT;
 
 export type FC<PropsT, DefaultPropsT> = React.FC<
   PropsT & Partial<DefaultPropsT>
