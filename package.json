@@ -1,6 +1,6 @@
 {
   "name": "react-default-props-context",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Provide form state via a React Context",
   "main": "index.js",
   "repository": "https://github.com/mnieber/react-form-state-context.git",
@@ -9,7 +9,7 @@
   "types": "index.d.ts",
   "prepublish": "tsc",
   "dependencies": {
-    "@types/react": "^16.9.51",
+    "@types/react": "^16.9.52",
     "react": "^16.13.1"
   },
   "devDependencies": {
