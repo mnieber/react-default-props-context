@@ -2,7 +2,9 @@ import * as React from "react";
 
 import { useDefaultPropsContext } from "./NestedDefaultPropsProvider";
 
-const _mergeDefaultProps = (props: any) => {
+export const useDefaultProps = <PropsT, DefaultPropsT>(
+  props: PropsT & Partial<DefaultPropsT>
+) => {
   const defaultProps = useDefaultPropsContext();
 
   if (!defaultProps) {
@@ -10,27 +12,19 @@ const _mergeDefaultProps = (props: any) => {
   }
 
   return new Proxy(props, {
-    get: function (obj, prop) {
+    get: function (obj: any, prop: string) {
       if (prop in obj) {
         return obj[prop];
       }
-      if (prop in props.defaultProps) {
-        return props.defaultProps[prop]();
+      if (prop in defaultProps) {
+        return defaultProps[prop]();
+      } else {
+        return undefined;
       }
-      return undefined;
     },
-  });
+  }) as PropsT & DefaultPropsT;
 };
 
-interface MixInDefaultProps {
-  defaultProps?: any;
-  children?: any;
-}
-
-export const useDefaultProps = <PropsT, DefaultPropsT>(
-  props: PropsT & MixInDefaultProps & Partial<DefaultPropsT>
-) => _mergeDefaultProps(props) as PropsT & MixInDefaultProps & DefaultPropsT;
-
 export type FC<PropsT, DefaultPropsT> = React.FC<
-  PropsT & MixInDefaultProps & Partial<DefaultPropsT>
+  PropsT & Partial<DefaultPropsT>
 >;
