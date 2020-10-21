@@ -22,15 +22,11 @@ const _mergeDefaultProps = (props: any) => {
   });
 };
 
-interface MixInDefaultProps {
-  defaultProps?: any;
-  children?: any;
-}
-
 export const useDefaultProps = <PropsT, DefaultPropsT>(
-  props: PropsT & MixInDefaultProps & Partial<DefaultPropsT>
-) => _mergeDefaultProps(props) as PropsT & MixInDefaultProps & DefaultPropsT;
+  props: React.PropsWithChildren<PropsT & Partial<DefaultPropsT>>
+) =>
+  _mergeDefaultProps(props) as React.PropsWithChildren<PropsT & DefaultPropsT>;
 
 export type FC<PropsT, DefaultPropsT> = React.FC<
-  PropsT & MixInDefaultProps & Partial<DefaultPropsT>
+  PropsT & Partial<DefaultPropsT>
 >;
