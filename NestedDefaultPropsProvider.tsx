@@ -1,6 +1,8 @@
 import * as React from "react";
 
-export const DefaultPropsContext = React.createContext({});
+export const DefaultPropsContext = React.createContext<{
+  [key: string]: Function;
+}>({});
 
 export const useDefaultPropsContext = () => {
   return React.useContext(DefaultPropsContext);
