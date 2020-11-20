@@ -19,9 +19,7 @@ export const CtrProvider: React.FC<PropsT> = (props: PropsT) => {
   });
 
   React.useEffect(() => {
-    if (props.updateCtr) {
-      props.updateCtr(ctr);
-    }
+    return props.updateCtr ? props.updateCtr(ctr) : undefined;
   });
 
   return (
