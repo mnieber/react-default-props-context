@@ -109,6 +109,9 @@ export const TodoListCtrProvider = ({ children }) => {
       }),
       ({ userProfile }) => {
         ctr.inputs.setUserProfile(userProfile);
+      },
+      {
+        fireImmediately: true,
       }
     );
 
