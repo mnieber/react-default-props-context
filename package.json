@@ -1,6 +1,6 @@
 {
   "name": "react-default-props-context",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An alternative way to provide default properties to React components",
   "main": "index.js",
   "repository": "https://github.com/mnieber/react-form-state-context.git",
