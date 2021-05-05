@@ -8,9 +8,9 @@
   "license": "MIT",
   "types": "index.d.ts",
   "prepublish": "tsc",
-  "dependencies": {
+  "peerDependencies": {
     "@types/react": "^16.9.52",
-    "react": "^16.13.1"
+    "react": ">=16.13.1"
   },
   "devDependencies": {
     "typescript": "^4.0.3"
