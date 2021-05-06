@@ -71,11 +71,12 @@ and the default properties (that were provided via a DefaultPropsContext).
 
 ### CtrProvider
 
-This is a helper component that does three things:
+This is a helper component that does the following things:
 
 1. instantiate a container
 2. keep the container up-to-date when some input data changes
 3. provide the contents of the container as default properties using a `NestedDefaultPropsProvider`
+4. destroy the container (via a custom destroy function) when the `CtrProvider` is unmounted.
 
 The `CtrProvider` component has the following properties:
 
@@ -85,12 +86,11 @@ The `CtrProvider` component has the following properties:
   up-to-date) then it should return a dispose function that removes this mechanism.
 - getDefaultProps - the function that returns a dictionary of getter functions which expose the contents of the
   container as default properties.
-- ctrKey - an optional string that ensures that the container is kept alive in case the `CtrProvider` is destroyed.
-  Note that if a new `CtrProvider` instance is mounted then the `updateCtr` function will be called (but not
-  `createCtr`)
 
 ```
 export const TodoListCtrProvider = ({ children }) => {
+  const [cleanUpReaction, setCleanUpReaction] = React.useState();
+
   const createCtr = () => {
     const ctr = new TodoListCtr();
 
@@ -102,8 +102,8 @@ export const TodoListCtrProvider = ({ children }) => {
   };
 
   // keep ctr.inputs.userProfile up-to-date
-  const updateCtr = (ctr: TodoListContainer) =>
-    reaction(
+  const updateCtr = (ctr: TodoListContainer) => {
+    const f = reaction(
       () => ({
         userProfile: props.userProfile,
       }),
@@ -114,6 +114,8 @@ export const TodoListCtrProvider = ({ children }) => {
         fireImmediately: true,
       }
     );
+    setCleanUpReaction(f);
+  }
 
   const getDefaultProps = ctr => {
     return {
@@ -125,9 +127,9 @@ export const TodoListCtrProvider = ({ children }) => {
 
   return (
     <CtrProvider
-      ctrKey={"my todo list container"}
       createCtr={createCtr}
       updateCtr={updateCtr}
+      destroyCtr={() => cleanUpReaction()}
       getDefaultProps={getDefaultProps}
       children={children}
     />
