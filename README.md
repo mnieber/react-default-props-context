@@ -136,3 +136,22 @@ export const TodoListCtrProvider = ({ children }) => {
   );
 };
 ```
+
+### The addCleanUpFunctionToCtr and cleanUpCtr helper functions
+
+The `addCleanUpFunctionToCtr` associates a clean-up function directly with
+a container. We can use it in the updateCtr function (see above) as follows:
+
+```
+  // keep ctr.inputs.userProfile up-to-date
+  const updateCtr = (ctr: TodoListContainer) => {
+    const f = reaction(
+      // Details omitted...
+    );
+    addCleanUpFunctionToCtr(ctr, f); // instead of: setCleanUpReaction(f);
+  }
+```
+
+We can now remove the local state (created with React.useState()`) and replace `destroyCtr={() => cleanUpReaction()}`with`destroyCtr={(ctr) => cleanUpCtr(ctr)}`. The benefit of using `addCleanUpFunctionToCtr` is that it decouples the registration of
+clean-up functions from the execution of the clean-up (at any place in the code, you can add
+more clean-up functions to a container).
