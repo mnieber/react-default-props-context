@@ -34,15 +34,18 @@ const _createProxy = <PropsT, DefaultPropsT>(
 export function withDefaultProps<
   PropsT,
   DefaultPropsT,
-  AsT = PropsT & Partial<DefaultPropsT>
->(f: React.FC<PropsT & DefaultPropsT>) {
+  FixedDefaultPropsT = {}
+>(f: React.FC<PropsT & DefaultPropsT & FixedDefaultPropsT>) {
   return ((p: PropsT) => {
     const defaultProps = withDefaultPropsContext();
     if (!defaultProps) {
       console.error('No default props: ', p);
     }
 
-    const props = _createProxy<PropsT, DefaultPropsT>(p, defaultProps);
+    const props = _createProxy<PropsT, DefaultPropsT & FixedDefaultPropsT>(
+      p,
+      defaultProps
+    );
     let newDefaultProps: any = undefined;
     for (const key of Object.keys(p)) {
       if (defaultProps.hasOwnProperty(key)) {
@@ -60,7 +63,7 @@ export function withDefaultProps<
     ) : (
       f(props)
     );
-  }) as React.FC<AsT>;
+  }) as React.FC<PropsT & Partial<DefaultPropsT>>;
 }
 
 export const childrenWithOriginalDefaultProps = (p: any) =>
