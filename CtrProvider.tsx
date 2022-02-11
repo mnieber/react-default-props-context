@@ -1,12 +1,11 @@
-import * as React from "react";
-
-import { NestedDefaultPropsProvider } from "./NestedDefaultPropsProvider";
+import * as React from 'react';
+import { NestedDefaultPropsProvider } from './NestedDefaultPropsProvider';
 
 type PropsT = React.PropsWithChildren<{
   createCtr: Function;
   destroyCtr: Function;
-  updateCtr: Function;
   getDefaultProps: Function;
+  updateCtr?: Function;
 }>;
 
 export const CtrProvider: React.FC<PropsT> = (props: PropsT) => {

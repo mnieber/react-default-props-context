@@ -1,4 +1,4 @@
-# useDefaultProps
+# withDefaultProps
 
 An alternative way to provide default properties to React components.
 See also [this](https://mnieber.github.io/react/typescript/2020/05/23/using-default-properties-in-react.html) and
@@ -7,7 +7,7 @@ See also [this](https://mnieber.github.io/react/typescript/2020/05/23/using-defa
 ## Synopsis
 
 ```
-import { useDefaultProps, FC } from "react-default-props-context";
+import { withDefaultProps } from "react-default-props-context";
 
 type PropsT = {
   name: string,
@@ -17,12 +17,13 @@ type DefaultPropsT = {
   color: string,
 }
 
-const MyComponent: FC<PropsT, DefaultPropsT> = (p: PropsT) => {
-  const props = useDefaultProps<PropsT, DefaultPropsT>(p);
-
-  // The color value comes either from p.color or from a DefaultPropsContext.
-  return <text color={props.color}>Hello</text>;
-}
+const MyComponent = withDefaultProps<PropsT, DefaultPropsT>(
+  (props: PropsT & DefaultPropsT) => {
+    // The color value is either received directly from the parent element (as a property)
+    // or comes from a DefaultPropsContext.
+    return <text color={props.color}>Hello</text>;
+  }
+);
 ```
 
 ## Reference documentation
@@ -31,7 +32,7 @@ const MyComponent: FC<PropsT, DefaultPropsT> = (p: PropsT) => {
 
 A `DefaultPropsContext` is a React context that offers a dictionary of getter functions.
 Each getter function corresponds to a default property that is available through
-the `useDefaultProps` hook.
+the `withDefaultProps` hook.
 
 ```
 import { DefaultPropsContext } from "react-default-props-context";
@@ -53,21 +54,15 @@ const MyFrame = observer(() => {
 })
 ```
 
-### FC
-
-The `FC` type (short for Functional Component) is similar to `React.FC`. In comparison to `React.FC` it
-receives a "default properties" type argument. It represents a react component with properties
-that may be either set directly or may come from the default properties context.
-
 ### NestedDefaultPropsProvider
 
 This is a React component that is similar to `DefaultPropsContext.Provider` but supports nesting.
 When nested instances of `NestedDefaultPropsProvider` are used, their default properties are automatically merged.
 
-### useDefaultProps
+### withDefaultProps
 
-This is a hook that returns a new properties object that gives access to the union of the component's properties
-and the default properties (that were provided via a DefaultPropsContext).
+This is a higher order function that collects both the normal properties and the default properties
+(that were provided via a DefaultPropsContext) and passes the combined properties to the wrapper function.
 
 ### CtrProvider
 
@@ -152,6 +147,7 @@ a container. We can use it in the updateCtr function (see above) as follows:
   }
 ```
 
-We can now remove the local state (created with React.useState()`) and replace `destroyCtr={() => cleanUpReaction()}`with`destroyCtr={(ctr) => cleanUpCtr(ctr)}`. The benefit of using `addCleanUpFunctionToCtr` is that it decouples the registration of
-clean-up functions from the execution of the clean-up (at any place in the code, you can add
-more clean-up functions to a container).
+The benefit of using `addCleanUpFunctionToCtr` is that it decouples the registration of
+clean-up functions from the execution of the clean-up. At any place in the code, you can add
+more clean-up functions to a container. We can now remove the local state
+(created with `React.useState()`) and replace `destroyCtr={() => cleanUpReaction()}` with `destroyCtr={(ctr) => cleanUpCtr(ctr)}`.

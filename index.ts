@@ -1,8 +1,11 @@
+export { addCleanUpFunctionToCtr, cleanUpCtr } from './cleanUp';
+export { CtrProvider } from './CtrProvider';
 export {
   DefaultPropsContext,
   NestedDefaultPropsProvider,
-} from "./NestedDefaultPropsProvider";
-export { CtrProvider } from "./CtrProvider";
-export { useDefaultProps } from "./useDefaultProps";
-export type { FC } from "./useDefaultProps";
-export { addCleanUpFunctionToCtr, cleanUpCtr } from "./cleanUp";
+  withDefaultPropsContext,
+} from './NestedDefaultPropsProvider';
+export {
+  childrenWithOriginalDefaultProps,
+  withDefaultProps,
+} from './withDefaultProps';
