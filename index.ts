@@ -3,9 +3,6 @@ export { CtrProvider } from './CtrProvider';
 export {
   DefaultPropsContext,
   NestedDefaultPropsProvider,
-  withDefaultPropsContext,
+  useDefaultPropsContext,
 } from './NestedDefaultPropsProvider';
-export {
-  childrenWithOriginalDefaultProps,
-  withDefaultProps,
-} from './withDefaultProps';
+export { getOriginalDefaultProps, withDefaultProps } from './withDefaultProps';

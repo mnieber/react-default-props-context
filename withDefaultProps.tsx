@@ -1,8 +1,7 @@
 import * as React from 'react';
 import {
-  DefaultPropsContext,
   NestedDefaultPropsProvider,
-  withDefaultPropsContext,
+  useDefaultPropsContext,
 } from './NestedDefaultPropsProvider';
 
 const _createProxy = <PropsT, DefaultPropsT>(
@@ -11,13 +10,8 @@ const _createProxy = <PropsT, DefaultPropsT>(
 ) => {
   return new Proxy(props, {
     get: function (obj: any, prop: string) {
-      if (prop === 'childrenWithOriginalDefaultProps') {
-        const children = (props as any)['children'];
-        return (
-          <DefaultPropsContext.Provider value={defaultProps}>
-            {children}
-          </DefaultPropsContext.Provider>
-        );
+      if (prop === 'originalDefaultProps') {
+        return defaultProps;
       }
       if (prop in obj) {
         return obj[prop];
@@ -37,7 +31,7 @@ export function withDefaultProps<
   FixedDefaultPropsT = {}
 >(f: React.FC<PropsT & DefaultPropsT & FixedDefaultPropsT>) {
   return ((p: PropsT) => {
-    const defaultProps = withDefaultPropsContext();
+    const defaultProps = useDefaultPropsContext();
     if (!defaultProps) {
       console.error('No default props: ', p);
     }
@@ -46,6 +40,7 @@ export function withDefaultProps<
       p,
       defaultProps
     );
+
     let newDefaultProps: any = undefined;
     for (const key of Object.keys(p)) {
       if (defaultProps.hasOwnProperty(key)) {
@@ -66,5 +61,4 @@ export function withDefaultProps<
   }) as React.FC<PropsT & Partial<DefaultPropsT>>;
 }
 
-export const childrenWithOriginalDefaultProps = (p: any) =>
-  p.childrenWithOriginalDefaultProps;
+export const getOriginalDefaultProps = (p: any) => p.originalDefaultProps;

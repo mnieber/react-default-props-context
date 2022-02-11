@@ -4,12 +4,16 @@ export const DefaultPropsContext = React.createContext<{
   [key: string]: Function;
 }>({});
 
-export const withDefaultPropsContext = () => {
+export const useDefaultPropsContext = () => {
   return React.useContext(DefaultPropsContext);
 };
 
 export const NestedDefaultPropsProvider = (props: any) => {
-  const defaultProps = withDefaultPropsContext();
+  const defaultProps = useDefaultPropsContext();
+
+  if (!Object.keys(props.value).length) {
+    return props.children;
+  }
 
   const value = {
     ...(defaultProps || {}),
