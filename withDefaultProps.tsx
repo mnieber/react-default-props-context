@@ -31,9 +31,11 @@ const _createProxy = <PropsT, DefaultPropsT>(
   }) as PropsT & DefaultPropsT;
 };
 
-export function withDefaultProps<PropsT, DefaultPropsT>(
-  f: React.FC<PropsT & DefaultPropsT>
-) {
+export function withDefaultProps<
+  PropsT,
+  DefaultPropsT,
+  AsT = PropsT & Partial<DefaultPropsT>
+>(f: React.FC<PropsT & DefaultPropsT>) {
   return ((p: PropsT) => {
     const defaultProps = withDefaultPropsContext();
     if (!defaultProps) {
@@ -58,7 +60,7 @@ export function withDefaultProps<PropsT, DefaultPropsT>(
     ) : (
       f(props)
     );
-  }) as React.FC<PropsT & Partial<DefaultPropsT>>;
+  }) as React.FC<AsT>;
 }
 
 export const childrenWithOriginalDefaultProps = (p: any) =>
