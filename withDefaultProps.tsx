@@ -4,19 +4,23 @@ import {
   useDefaultPropsContext,
 } from './NestedDefaultPropsProvider';
 
+const originalDefaultProps = Symbol();
+const originalProps = Symbol();
+
 const _createProxy = <PropsT, DefaultPropsT>(
   props: PropsT & Partial<DefaultPropsT>,
   defaultProps: { [key: string]: Function }
 ) => {
   return new Proxy(props, {
-    get: function (obj: any, prop: string) {
-      if (prop === 'originalDefaultProps') {
+    get: function (obj: any, prop: any) {
+      if (prop === originalDefaultProps) {
         return defaultProps;
+      } else if (prop === originalProps) {
+        return props;
       }
       if (prop in obj) {
         return obj[prop];
-      }
-      if (prop in defaultProps) {
+      } else if (prop in defaultProps) {
         return defaultProps[prop]();
       } else {
         return undefined;
@@ -61,4 +65,5 @@ export function withDefaultProps<
   }) as React.FC<PropsT & Partial<DefaultPropsT>>;
 }
 
-export const getOriginalDefaultProps = (p: any) => p.originalDefaultProps;
+export const getOriginalDefaultProps = (p: any) => p[originalDefaultProps];
+export const getOriginalProps = (p: any) => p[originalProps];
