@@ -20,7 +20,7 @@ export const CtrProvider: React.FC<PropsT> = (props: PropsT) => {
       props.destroyCtr(ctr);
     };
     return unmount;
-  });
+  }, []);
 
   return (
     <NestedDefaultPropsProvider value={props.getDefaultProps(ctr)}>
