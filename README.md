@@ -51,8 +51,7 @@ const MyComponent = withDefaultProps<PropsT, DefaultPropsT>(
 
 ## DocuFactation
 
-The remainder of this documentation uses the DocuFactation format: it presents a series of
-snippets and facts about those snippets.
+The remainder of this documentation presents a series of snippets and facts about those snippets.
 
 ---
 

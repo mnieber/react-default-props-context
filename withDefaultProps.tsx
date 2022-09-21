@@ -41,12 +41,12 @@ export function withDefaultProps<
     }
 
     const props = _createProxy<PropsT, DefaultPropsT & FixedDefaultPropsT>(
-      p,
+      p as any,
       defaultProps
     );
 
     let newDefaultProps: any = undefined;
-    for (const key of Object.keys(p)) {
+    for (const key of Object.keys(p as any)) {
       if (defaultProps.hasOwnProperty(key)) {
         if (newDefaultProps === undefined) {
           newDefaultProps = {};
