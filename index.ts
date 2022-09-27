@@ -1,8 +1,7 @@
 export { addCleanUpFunctionToCtr, cleanUpCtr } from './cleanUp';
-export { CtrProvider } from './CtrProvider';
 export {
   DefaultPropsContext,
-  NestedDefaultPropsProvider,
+  NestedDefaultPropsContext,
   useDefaultPropsContext,
-} from './NestedDefaultPropsProvider';
+} from './NestedDefaultPropsContext';
 export { getOriginalDefaultProps, withDefaultProps } from './withDefaultProps';

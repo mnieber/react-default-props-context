@@ -1,15 +1,15 @@
 import * as React from 'react';
 import {
-  NestedDefaultPropsProvider,
+  NestedDefaultPropsContext,
   useDefaultPropsContext,
-} from './NestedDefaultPropsProvider';
+} from './NestedDefaultPropsContext';
 
 const originalDefaultProps = Symbol();
 const originalProps = Symbol();
 
-const _createProxy = <PropsT, DefaultPropsT>(
-  props: PropsT & Partial<DefaultPropsT>,
-  defaultProps: { [key: string]: Function }
+const _createProxy = (
+  props: any,
+  defaultProps: { [key: string]: Function | undefined }
 ) => {
   return new Proxy(props, {
     get: function (obj: any, prop: any) {
@@ -21,33 +21,76 @@ const _createProxy = <PropsT, DefaultPropsT>(
       if (prop in obj) {
         return obj[prop];
       } else if (prop in defaultProps) {
-        return defaultProps[prop]();
+        return (defaultProps[prop] as Function)();
       } else {
         return undefined;
       }
     },
-  }) as PropsT & DefaultPropsT;
+  });
 };
 
-export function withDefaultProps<
-  PropsT,
-  DefaultPropsT,
-  FixedDefaultPropsT = {}
->(f: React.FC<PropsT & DefaultPropsT & FixedDefaultPropsT>) {
-  return ((p: PropsT) => {
-    const defaultProps = useDefaultPropsContext();
-    if (!defaultProps) {
+type Without<T, K> = Pick<T, Exclude<keyof T, keyof K>>;
+type ObjT = { [key: string]: any };
+
+export function withDefaultProps<AllPropsT, DefaultPropsT extends ObjT>(
+  f: React.FC<AllPropsT>,
+  defaultProps: DefaultPropsT
+) {
+  return ((p: AllPropsT) => {
+    const parentDefaultProps = useDefaultPropsContext();
+    const allDefaultProps = parentDefaultProps.defaultProps;
+
+    if (!allDefaultProps) {
       console.error('No default props: ', p);
     }
 
-    const props = _createProxy<PropsT, DefaultPropsT & FixedDefaultPropsT>(
-      p as any,
-      defaultProps
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      for (const key of Object.keys(defaultProps)) {
+        const isProvidedDefaultProp = allDefaultProps.hasOwnProperty(key);
+
+        if (!isProvidedDefaultProp) {
+          console.error(
+            `Error: prop ${key} is requested as a default prop but not provided ` +
+              `by a NestedDefaultPropsContext.`
+          );
+        } else if (allDefaultProps[key] === undefined) {
+          console.error(
+            `Error: prop ${key} is requested as a default prop but not provided ` +
+              `by a NestedDefaultPropsContext. It appears it was removed from the ` +
+              `default props object.`
+          );
+        }
+      }
+
+      for (const key of Object.keys(p as any)) {
+        const isRequestedDefaultProp = defaultProps.hasOwnProperty(key);
+        const isProvidedDefaultProp = allDefaultProps.hasOwnProperty(key);
+
+        if (!isRequestedDefaultProp && isProvidedDefaultProp) {
+          console.error(
+            `Error: you cannot use a property ${key} that ` +
+              `is also provided by a NestedDefaultPropsContext. ` +
+              `Did you forget to add it to the default props?`
+          );
+        }
+
+        if (
+          isRequestedDefaultProp &&
+          isProvidedDefaultProp &&
+          parentDefaultProps.fixed &&
+          parentDefaultProps.fixed[key]
+        ) {
+          console.error(`Error: trying to override fixed default prop ${key}.`);
+        }
+      }
+    }
 
     let newDefaultProps: any = undefined;
     for (const key of Object.keys(p as any)) {
-      if (defaultProps.hasOwnProperty(key)) {
+      const isRequestedDefaultProp = defaultProps.hasOwnProperty(key);
+      const isProvidedDefaultProp = allDefaultProps.hasOwnProperty(key);
+
+      if (isRequestedDefaultProp && isProvidedDefaultProp) {
         if (newDefaultProps === undefined) {
           newDefaultProps = {};
         }
@@ -55,14 +98,19 @@ export function withDefaultProps<
       }
     }
 
+    const props = _createProxy(p, allDefaultProps);
     return newDefaultProps ? (
-      <NestedDefaultPropsProvider value={newDefaultProps}>
+      <NestedDefaultPropsContext
+        value={{
+          defaultProps: newDefaultProps as any,
+        }}
+      >
         {f(props)}
-      </NestedDefaultPropsProvider>
+      </NestedDefaultPropsContext>
     ) : (
       f(props)
     );
-  }) as React.FC<PropsT & Partial<DefaultPropsT>>;
+  }) as React.FC<Without<AllPropsT, DefaultPropsT> & Partial<DefaultPropsT>>;
 }
 
 export const getOriginalDefaultProps = (p: any) => p[originalDefaultProps];

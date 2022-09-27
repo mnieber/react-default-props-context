@@ -19,10 +19,14 @@ the `withDefaultProps` higher order component.
 import { DefaultPropsContext } from 'react-default-props-context';
 
 const MyFrame = () => {
-  const defaultProps = { color: () => 'red' };
+  const defaultPropsContext = {
+    defaultProps: {
+      color: () => 'red',
+    },
+  };
 
   return (
-    <DefaultPropsContext.Provider value={defaultProps}>
+    <DefaultPropsContext.Provider value={defaultPropsContext}>
       <div>
         <MyComponent name="example using red (the default color)" />
         <MyComponent name="example using green" color="green" />
@@ -35,17 +39,20 @@ const MyFrame = () => {
 ### Consuming the default properties
 
 ```ts
-import { withDefaultProps } from 'react-default-props-context';
+import { withDefaultProps, stub } from 'react-default-props-context';
 
 type PropsT = { name: string };
-type DefaultPropsT = { color: string };
 
-const MyComponent = withDefaultProps<PropsT, DefaultPropsT>(
-  (props: PropsT & DefaultPropsT) => {
+const DefaultProps = { color: stub as string };
+
+const MyComponent = withDefaultProps(
+  //
+  (props: PropsT & typeof DefaultProps) => {
     // The props.color value either comes directly from the parent element
     // (as a property) or from a DefaultPropsContext.
     return <text color={props.color}>{`Hello ${props.name}`}</text>;
-  }
+  },
+  DefaultProps
 );
 ```
 
@@ -61,10 +68,14 @@ The remainder of this documentation presents a series of snippets and facts abou
 import { DefaultPropsContext } from 'react-default-props-context';
 
 const MyFrame = () => {
-  const defaultProps = { color: () => 'red' };
+  const defaultPropsContext = {
+    defaultProps: {
+      color: () => 'red',
+    },
+  };
 
   return (
-    <DefaultPropsContext.Provider value={defaultProps}>
+    <DefaultPropsContext.Provider value={defaultPropsContext}>
       <MyComponent name="example using red (the default color)" />
     </DefaultPropsContext.Provider>
   );
@@ -81,10 +92,7 @@ The `DefaultPropsContext.Provider` provides every default property stored in `de
 
 ### Default properties are stored as functions.
 
-Rather than storing values directly in `defaultProps`, each default property is stored as a function that returns the default value. This function is called when the consuming component (`MyComponent`) accesses the default property. There are two reasons for this design:
-
-- the function can return a transformed value. This adds some useful flexibility.
-- it prevents the providing component (`MyFrame`) from referencing the property value. This is important when using MobX (or any other framework that tracks variable access): if the default value changes then this will not trigger a re-render of `MyFrame`.
+Rather than storing values directly in `defaultProps`, each default property is stored as a function that returns the default value. This function is called when the consuming component (`MyComponent`) accesses the default property. There are two reasons for this design. First, it provides lazy evaluation, which means that the default property value can be unknown when the DefaultPropsContext is created. Second, it prevents the providing component (`MyFrame`) from referencing the property value. This is important when using MobX (or any other framework that tracks variable access): if the default value changes then this will not trigger a re-render of `MyFrame`.
 
 ---
 
@@ -94,12 +102,15 @@ Rather than storing values directly in `defaultProps`, each default property is 
 import { withDefaultProps } from 'react-default-props-context';
 
 type PropsT = { name: string };
-type DefaultPropsT = { color: string };
 
-const MyComponent = withDefaultProps<PropsT, DefaultPropsT>(
-  (props: PropsT & DefaultPropsT) => {
+const DefaultProps = { color: stub as string };
+
+const MyComponent = withDefaultProps(
+  //
+  (props: PropsT & typeof DefaultProps) => {
     return <text color={props.color}>{`Hello ${props.name}`}</text>;
-  }
+  },
+  DefaultProps
 );
 ```
 
@@ -111,9 +122,14 @@ The `withDefaultProps` function is a higher order component that receives a prop
 
 ---
 
-### DefaultPropsT declares the default properties
+### The default property types are declared using a plain object
 
-By convention, the `PropsT` type contains the normal properties of `MyFrame` and `DefaultPropsT` contains the default properties. Typescript will complain if you get or set a property that is not in `PropsT` or in `DefaultPropsT`.
+To tell `withDefaultProps` which default properties are used in a component, you need to pass in a plain `DefaultProps` object where:
+
+- the object keys contain the names of the default properties
+- the object value types contain the types of the default properties.
+
+Note that the object values themselves are unimportant, because the default property value will be provided by the enclosing `DefaultPropsContext`. The `withDefaultProps` function uses the default property names to assert (at run-time) that requested default property are provided. The default property types are used to produce a type error when overriding a default property using the wrong type.
 
 ---
 
@@ -126,13 +142,31 @@ import {
 } from 'react-default-props-context';
 
 const MyFrame = () => {
-  const defaultProps = { color: () => 'red' };
-  const moreDefaultProps = { size: () => 'large' };
+  const defaultPropsContext = {
+    defaultProps: {
+      color: () => 'red',
+      shape: () => 'circle',
+    },
+  };
+  const moreDefaultPropsContext = {
+    defaultProps: {
+      size: () => 123,
+      shape: undefined
+    }
+  };
 
   return (
-    <DefaultPropsContext.Provider value={defaultProps}>
-      <NestedDefaultPropsContext value={moreDefaultProps}>
-        <MyComponent name="example using green" color="green" />
+    <DefaultPropsContext.Provider value={{
+      defaultProps: defaultProps,
+      fixed: { shape: true },
+    }}>
+      <NestedDefaultPropsContext
+        value={{ defaultProps: moreDefaultProps }}
+      >
+      <MyComponent name="example using green" color="green">
+        <MyComponent name="this nested component also uses green"/>
+        <MyComponent name="this nested component uses blue" color="blue"/>
+      <MyComponent/>
       </NestedDefaultPropsContext>
     </DefaultPropsContext.Provider>
   );
@@ -147,60 +181,61 @@ Because we use a `NestedDefaultPropsContext` here, the `MyComponent` instance ca
 
 ---
 
-### 🟢 Snippet (./MyFrame.tsx)
-
-```ts
-import { DefaultPropsContext } from 'react-default-props-context';
-
-const MyFrame = () => {
-  const defaultProps = { color: () => 'red' };
-
-  return (
-    <DefaultPropsContext.Provider value={defaultProps}>
-      <MyComponent name="example using green" color="green">
-        <MyComponent name="this nested component also uses green"/>
-        <MyComponent name="this nested component uses blue" color="blue"/>
-      <MyComponent/>
-    </DefaultPropsContext.Provider>
-  );
-};
-```
-
----
-
 ### You can override a default property value
 
 Here, we override the default `color` value by setting it to `green`. This works by wrapping the `MyComponent` instance in a `NestedDefaultPropsProvider` that adds a new `color` default property with `green` as its value. So when `MyFrame` sets the `color` property of `MyComponent`, it has the side effect of overriding the default `color` property. This means that the new default value (`green`) is also provided to any child components of `MyComponent`.
 
 ---
 
-### Be careful when sharing names between normal and default properties
+### You can declare a default property to be fixed
 
-If `MyComponent` has a normal `color` property (in `PropsT` instead of in `DefaultPropsT`) then setting `color="green"` still has the effect of overriding the existing value of the `color` default property. It's better to avoid this situation and add `color` to `DefaultPropsT`.
+In some case, it's good to allow components to use a default property, but not to override it. This can be achieved this by setting the `fixed` options object. In the example, we see how this is used to declare `shape` to be fixed.
+
+---
+
+### Default properties can be removed
+
+Sometimes you want to remove a default property in a particular branch of the rendering tree. You can do this by setting the property to undefined in the `defaultProps` object. In the above example, the `shape` default property was removed.
 
 ---
 
 ### 🟢 Snippet (./MyFrame.tsx)
 
 ```ts
-import {
-  withDefaultProps,
-  getOriginalProps,
-  getOriginalDefaultProps,
-} from 'react-default-props-context';
+// file: dps.ts
+import { stub } from 'react-default-props-context';
+
+const dps = {
+  color: { color: stub as string };
+  size: { size: stub as int };
+}
+```
+
+```ts
+// file: MyComponent.tsx
+import { withDefaultProps } from 'react-default-props-context';
+import { dps } from 'dps';
 
 type PropsT = { name: string };
-type DefaultPropsT = { color: string };
 
-const MyComponent = withDefaultProps<PropsT, DefaultPropsT>(
-  (props: PropsT & DefaultPropsT) => {
-    const propsReceivedFromParent = getOriginalProps(props);
-    const defaultPropsWithoutOverrides = getOriginalDefaultProps(props);
+const DefaultProps = {
+  ...dps.color,
+  ...dps.size,
+};
 
-    return <text color={props.color}>{`Hello ${props.name}`}</text>;
-  }
-);
+const MyComponent = withDefaultProps((props: PropsT & typeof DefaultProps) => {
+  const propsReceivedFromParent = getOriginalProps(props);
+  const defaultPropsWithoutOverrides = getOriginalDefaultProps(props);
+
+  return <text color={props.color}>{`Size is ${props.size}`}</text>;
+}, DefaultProps);
 ```
+
+---
+
+### The default properties can be defined centrally
+
+It makes sense to use a central location to define the names and types of the default properties that are used in the application. This way, when using the default properties in your component, you are protected from misspelling the names, or using the wrong types. In the above example, we see how `color` and `size` can be defined in a global `dps.ts` file.
 
 ---
 
@@ -213,86 +248,3 @@ The `props` argument of `MyComponent` contains both normal properties and defaul
 ### The getOriginalDefaultProps returns the default properties without overrides
 
 If the parent component of `MyComponent` sets the `color` property (e.g. `color="green"`) then this has the effect of overriding the `color` default property value . If you want to access the original default properties (without overrides from the parent component) then you can use the `getOriginalDefaultProps` function.
-
----
-
-### 🟢 Snippet (./TodoListCtrProvider.tsx)
-
-```ts
-import {
-  addCleanUpFunctionToCtr,
-  cleanUpCtr,
-  CtrProvider,
-} from 'react-default-props-context';
-import { reaction } from 'mobx';
-
-export const TodoListCtrProvider = ({ children }) => {
-  const createCtr = () => {
-    const ctr = new TodoListCtr();
-    ctr.filtering.setIsFilterActive(true);
-    return ctr;
-  };
-
-  const updateCtr = (ctr: TodoListContainer) => {
-    const f = reaction(
-      () => ({
-        userProfile: props.userProfile,
-      }),
-      ({ userProfile }) => {
-        ctr.inputs.setUserProfile(userProfile);
-      },
-      {
-        fireImmediately: true,
-      }
-    );
-    addCleanUpFunctionToCtr(ctr, f);
-  };
-
-  const getDefaultProps = (ctr) => {
-    return {
-      todoListStorage: () => ctr.storage,
-      todoListFiltering: () => ctr.filtering,
-      todoListCtr: () => ctr,
-    };
-  };
-
-  return (
-    <CtrProvider
-      createCtr={createCtr}
-      updateCtr={updateCtr}
-      destroyCtr={(ctr) => cleanUpCtr(ctr)}
-      getDefaultProps={getDefaultProps}
-    >
-      {children}
-    <CtrProvider/>
-  );
-};
-```
-
----
-
-### CtrProvider connects a data container to a NestedDefaultPropsProvider
-
-`CtrProvider` is a helper component that connects a data container to a `NestedDefaultPropsProvider`. It does the following things:
-
-1. instantiate the container
-2. keep the container up-to-date when some input data changes
-3. provide the contents of the container as default properties using a `NestedDefaultPropsProvider`
-4. destroy the container when the `CtrProvider` is unmounted.
-
----
-
-### CtrProvider has createCtr, updateCtr, getDefaultProps and destroyCtr
-
-The `CtrProvider` component has the following properties:
-
-- createCtr - the function that creates a new container (of type `TodoListContainer`)
-- updateCtr - the function that is called after mounting the `CtrProvider` to keep the container up-to-date. Here, we call `ctr.inputs.setUserProfile`.
-- getDefaultProps - the function that returns a dictionary of getter functions which expose the contents of the container as default properties.
-- destroyCtr - the function that is called when `CtrProvider` unmounts
-
----
-
-### addCleanUpFunctionToCtr registers a clean up function
-
-It's often the case that resource are allocated when creating a container, which must be deallocated when the container is destroyed in the `destroyCtr` function. For this purpose you can call `addCleanUpFunctionToCtr(f, ctr)` to register a clean up function `f` in container `ctr`. Then, you can use `destroyCtr={(ctr) => cleanUpCtr(ctr)}` to execute these cleanup functions when the `CtrProvider` unmounts.
