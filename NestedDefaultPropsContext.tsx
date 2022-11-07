@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+export const stub = null as unknown;
+
 type ObjT = { [key: string]: any };
 
 export type ValueT = {
