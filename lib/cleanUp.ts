@@ -1,4 +1,4 @@
-import { getCtrAdmin } from './internal/utils';
+import { getCtrAdmin } from '../internal/utils';
 
 export function addCleanUpFunctionToCtr(ctr: any, f: Function) {
   const ctrAdmin = getCtrAdmin(ctr);

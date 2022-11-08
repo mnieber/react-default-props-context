@@ -1,8 +1,11 @@
-export { addCleanUpFunctionToCtr, cleanUpCtr } from './cleanUp';
+export { addCleanUpFunctionToCtr, cleanUpCtr } from './lib/cleanUp';
 export {
   DefaultPropsContext,
   NestedDefaultPropsContext,
   stub,
   useDefaultPropsContext,
-} from './NestedDefaultPropsContext';
-export { getOriginalDefaultProps, withDefaultProps } from './withDefaultProps';
+} from './lib/NestedDefaultPropsContext';
+export {
+  getOriginalDefaultProps,
+  withDefaultProps,
+} from './lib/withDefaultProps';
