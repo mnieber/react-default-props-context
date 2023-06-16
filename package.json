@@ -1,6 +1,6 @@
 {
   "name": "react-default-props-context",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "An alternative way to provide default properties to React components",
   "main": "index.js",
   "repository": "https://github.com/mnieber/react-default-props-context.git",
