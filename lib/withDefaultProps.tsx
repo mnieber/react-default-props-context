@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {
-  NestedDefaultPropsContext,
+  DefaultPropsProvider,
   useDefaultPropsContext,
-} from './NestedDefaultPropsContext';
+} from './DefaultPropsContext';
 
 const originalDefaultProps = Symbol();
 const originalProps = Symbol();
@@ -51,12 +51,12 @@ export function withDefaultProps<AllPropsT, DefaultPropsT extends ObjT>(
         if (!isProvidedDefaultProp) {
           console.error(
             `Error: prop ${key} is requested as a default prop but not provided ` +
-              `by a NestedDefaultPropsContext.`
+              `by a DefaultPropsContext.`
           );
         } else if (allDefaultProps[key] === undefined) {
           console.error(
             `Error: prop ${key} is requested as a default prop but not provided ` +
-              `by a NestedDefaultPropsContext. It appears it was removed from the ` +
+              `by a DefaultPropsContext. It appears it was removed from the ` +
               `default props object.`
           );
         }
@@ -69,7 +69,7 @@ export function withDefaultProps<AllPropsT, DefaultPropsT extends ObjT>(
         if (!isRequestedDefaultProp && isProvidedDefaultProp) {
           console.error(
             `Error: you cannot use a property ${key} that ` +
-              `is also provided by a NestedDefaultPropsContext. ` +
+              `is also provided by a DefaultPropsContext. ` +
               `Did you forget to add it to the default props?`
           );
         }
@@ -100,13 +100,14 @@ export function withDefaultProps<AllPropsT, DefaultPropsT extends ObjT>(
 
     const props = _createProxy(p, allDefaultProps);
     return newDefaultProps ? (
-      <NestedDefaultPropsContext
+      <DefaultPropsProvider
+        extend
         value={{
           defaultProps: newDefaultProps as any,
         }}
       >
         {f(props)}
-      </NestedDefaultPropsContext>
+      </DefaultPropsProvider>
     ) : (
       f(props)
     );

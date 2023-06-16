@@ -19,22 +19,20 @@ export const useDefaultPropsContext = () => {
   return React.useContext(DefaultPropsContext);
 };
 
-export const NestedDefaultPropsContext = (
-  props: React.PropsWithChildren<{ value: ValueT }>
-) => {
+export const DefaultPropsProvider = (props: React.PropsWithChildren<{ value: ValueT, extend?: boolean }>) => {
   const parentValue = useDefaultPropsContext();
 
   return (
     <DefaultPropsContext.Provider
       value={{
-        defaultProps: {
+        defaultProps: props.extend ? {
           ...parentValue.defaultProps,
           ...props.value.defaultProps,
-        },
-        fixed: {
+        } : props.value.defaultProps,
+        fixed: props.extend ? {
           ...(parentValue.fixed ?? {}),
           ...(props.value.fixed ?? {}),
-        },
+        } : props.value.fixed,
       }}
     >
       {props.children}

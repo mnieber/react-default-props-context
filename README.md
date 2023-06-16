@@ -9,14 +9,16 @@ Below the Synopsis we present several snippets (short examples) and facts about 
 
 ## Synopsis
 
-A `DefaultPropsContext` is a React context that offers a dictionary of getter functions.
+A `PropsContext` is a React context that offers a dictionary of getter functions.
 Each getter function corresponds to a default property that is available through
 the `withDefaultProps` higher order component.
+Instead of using `DefaultPropsContext.Provider`, you should use the `DefaultPropsProvider`
+component, which offers additional functionality (i.e. the `extend` attribute).
 
 ### Providing the default properties
 
 ```ts
-import { DefaultPropsContext } from 'react-default-props-context';
+import { DefaultPropsProvider } from 'react-default-props-context';
 
 const MyFrame = () => {
   const defaultPropsContext = {
@@ -26,12 +28,13 @@ const MyFrame = () => {
   };
 
   return (
-    <DefaultPropsContext.Provider value={defaultPropsContext}>
+    // Note that DefaultPropsProvider is a substitute for DefaultPropsContext.Provider
+    <DefaultPropsProvider value={defaultPropsContext}>
       <div>
         <MyComponent name="example using red (the default color)" />
         <MyComponent name="example using green" color="green" />
       </div>
-    </DefaultPropsContext.Provider>
+    </DefaultPropsProvider>
   );
 };
 ```
@@ -49,7 +52,7 @@ const MyComponent = withDefaultProps(
   //
   (props: PropsT & typeof DefaultProps) => {
     // The props.color value either comes directly from the parent element
-    // (as a property) or from a DefaultPropsContext.
+    // (as a property) or from a PropsContext.
     return <text color={props.color}>{`Hello ${props.name}`}</text>;
   },
   DefaultProps
@@ -65,7 +68,7 @@ The remainder of this documentation presents a series of snippets and facts abou
 ### 🟢 Snippet (./MyFrame.tsx)
 
 ```ts
-import { DefaultPropsContext } from 'react-default-props-context';
+import { DefaultPropsProvider } from 'react-default-props-context';
 
 const MyFrame = () => {
   const defaultPropsContext = {
@@ -75,24 +78,24 @@ const MyFrame = () => {
   };
 
   return (
-    <DefaultPropsContext.Provider value={defaultPropsContext}>
+    <DefaultPropsProvider value={defaultPropsContext}>
       <MyComponent name="example using red (the default color)" />
-    </DefaultPropsContext.Provider>
+    </DefaultPropsProvider>
   );
 };
 ```
 
 ---
 
-### DefaultPropsContext.Provider provides default properties
+### DefaultPropsProvider provides default properties
 
-The `DefaultPropsContext.Provider` provides every default property stored in `defaultProps` to its nested components (`MyComponent`).
+The `DefaultPropsProvider` provides every default property stored in `defaultProps` to its nested components (`MyComponent`).
 
 ---
 
 ### Default properties are stored as functions.
 
-Rather than storing values directly in `defaultProps`, each default property is stored as a function that returns the default value. This function is called when the consuming component (`MyComponent`) accesses the default property. There are two reasons for this design. First, it provides lazy evaluation, which means that the default property value can be unknown when the DefaultPropsContext is created. Second, it prevents the providing component (`MyFrame`) from referencing the property value. This is important when using MobX (or any other framework that tracks variable access): if the default value changes then this will not trigger a re-render of `MyFrame`.
+Rather than storing values directly in `defaultProps`, each default property is stored as a function that returns the default value. This function is called when the consuming component (`MyComponent`) accesses the default property. There are two reasons for this design. First, it provides lazy evaluation, which means that the default property value can be unknown when the PropsContext is created. Second, it prevents the providing component (`MyFrame`) from referencing the property value. This is important when using MobX (or any other framework that tracks variable access): if the default value changes then this will not trigger a re-render of `MyFrame`.
 
 ---
 
@@ -118,7 +121,7 @@ const MyComponent = withDefaultProps(
 
 ### withDefaultProps gives access to the default properties
 
-The `withDefaultProps` function is a higher order component that receives a properties object and "enriches" it with the default properties provided by the enclosing `DefaultPropsContext.Provider`. It passes the enriched properties to it's enclosed component function. Informally, you can think of it as receiving the `props.color` value either from the parent component (that can set this property) or from the enclosing `DefaultPropsContext`.
+The `withDefaultProps` function is a higher order component that receives a properties object and "enriches" it with the default properties provided by the enclosing `DefaultPropsProvider`. It passes the enriched properties to it's enclosed component function. Informally, you can think of it as receiving the `props.color` value either from the parent component (that can set this property) or from the enclosing `PropsContext`.
 
 ---
 
@@ -129,17 +132,14 @@ To tell `withDefaultProps` which default properties are used in a component, you
 - the object keys contain the names of the default properties
 - the object value types contain the types of the default properties.
 
-Note that the object values themselves are unimportant, because the default property value will be provided by the enclosing `DefaultPropsContext`. The `withDefaultProps` function uses the default property names to assert (at run-time) that requested default property are provided. The default property types are used to produce a type error when overriding a default property using the wrong type.
+Note that the object values themselves are unimportant, because the default property value will be provided by the enclosing `PropsContext`. The `withDefaultProps` function uses the default property names to assert (at run-time) that requested default property are provided. The default property types are used to produce a type error when overriding a default property using the wrong type.
 
 ---
 
 ### 🟢 Snippet (./MyFrame.tsx)
 
 ```ts
-import {
-  DefaultPropsContext,
-  NestedDefaultPropsContext,
-} from 'react-default-props-context';
+import { DefaultPropsProvider } from 'react-default-props-context';
 
 const MyFrame = () => {
   const defaultPropsContext = {
@@ -156,34 +156,32 @@ const MyFrame = () => {
   };
 
   return (
-    <DefaultPropsContext.Provider value={{
+    <DefaultPropsProvider value={{
       defaultProps: defaultProps,
       fixed: { shape: true },
     }}>
-      <NestedDefaultPropsContext
-        value={{ defaultProps: moreDefaultProps }}
-      >
-      <MyComponent name="example using green" color="green">
-        <MyComponent name="this nested component also uses green"/>
-        <MyComponent name="this nested component uses blue" color="blue"/>
-      <MyComponent/>
-      </NestedDefaultPropsContext>
-    </DefaultPropsContext.Provider>
+      <DefaultPropsProvider extend value={{ defaultProps: moreDefaultProps }}>
+        <MyComponent name="example using green" color="green">
+          <MyComponent name="this nested component also uses green"/>
+          <MyComponent name="this nested component uses blue" color="blue"/>
+        <MyComponent/>
+      </DefaultPropsProvider>
+    </DefaultDefaultPropsProvider>
   );
 };
 ```
 
 ---
 
-### NestedDefaultPropsContext extends the list of default properties
+### DefaultPropsProvider with extend=true extends the list of default properties
 
-Because we use a `NestedDefaultPropsContext` here, the `MyComponent` instance can access both the `color` and the `size` default property. If we replace the `NestedDefaultPropsContext` with another `DefaultPropsContext.Provider` then `MyComponent` only has access to `size` (because it only takes default properties from the nearest enclosing `DefaultPropsContext.Provider`).
+Because we use a `DefaultPropsProvider` with `extend=true` here, the `MyComponent` instance can access both the `color` and the `size` default property. If we dont set `extend` to true then `MyComponent` only has access to `size` (because it only takes default properties from the nearest enclosing `DefaultDefaultPropsProvider`).
 
 ---
 
 ### You can override a default property value
 
-Here, we override the default `color` value by setting it to `green`. This works by wrapping the `MyComponent` instance in a `NestedDefaultPropsProvider` that adds a new `color` default property with `green` as its value. So when `MyFrame` sets the `color` property of `MyComponent`, it has the side effect of overriding the default `color` property. This means that the new default value (`green`) is also provided to any child components of `MyComponent`.
+Here, we override the default `color` value by setting it to `green`. This works by wrapping the `MyComponent` instance in a extended `DefaultPropsProvider` that adds a new `color` default property with `green` as its value. So when `MyFrame` sets the `color` property of `MyComponent`, it has the side effect of overriding the default `color` property. This means that the new default value (`green`) is also provided to any child components of `MyComponent`.
 
 ---
 
@@ -235,7 +233,9 @@ const MyComponent = withDefaultProps((props: PropsT & typeof DefaultProps) => {
 
 ### The default properties can be defined centrally
 
-It makes sense to use a central location to define the names and types of the default properties that are used in the application. This way, when using the default properties in your component, you are protected from misspelling the names, or using the wrong types. In the above example, we see how `color` and `size` can be defined in a global `dps.ts` file.
+It makes sense to use a central location to define the names and types of the default properties that are used in the application.
+This way, when using the default properties in your component, you are protected from misspelling the names, or using the wrong types.
+In the above example, we see how `color` and `size` can be defined in a global `defaultProps.ts` file.
 
 ---
 

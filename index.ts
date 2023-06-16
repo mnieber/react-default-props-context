@@ -1,11 +1,8 @@
+export { DefaultPropsProvider, stub, useDefaultPropsContext } from './lib/DefaultPropsContext';
 export { addCleanUpFunctionToCtr, cleanUpCtr } from './lib/cleanUp';
 export {
-  DefaultPropsContext,
-  NestedDefaultPropsContext,
-  stub,
-  useDefaultPropsContext,
-} from './lib/NestedDefaultPropsContext';
-export {
   getOriginalDefaultProps,
-  withDefaultProps,
+  getOriginalProps,
+  withDefaultProps
 } from './lib/withDefaultProps';
+
