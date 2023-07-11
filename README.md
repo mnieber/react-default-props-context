@@ -147,6 +147,7 @@ const MyFrame = () => {
       color: () => 'red',
       shape: () => 'circle',
     },
+    fixed: { shape: true },
   };
   const moreDefaultPropsContext = {
     defaultProps: {
@@ -156,11 +157,8 @@ const MyFrame = () => {
   };
 
   return (
-    <DefaultPropsProvider value={{
-      defaultProps: defaultProps,
-      fixed: { shape: true },
-    }}>
-      <DefaultPropsProvider extend value={{ defaultProps: moreDefaultProps }}>
+    <DefaultPropsProvider value={defaultPropsContext}>
+      <DefaultPropsProvider extend value={moreDefaultPropsContext}>
         <MyComponent name="example using green" color="green">
           <MyComponent name="this nested component also uses green"/>
           <MyComponent name="this nested component uses blue" color="blue"/>
